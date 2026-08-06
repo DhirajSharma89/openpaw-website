@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OpenPaw - Open Source Pet Robot Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+/* ===== RESET & BASE ===== */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;overflow-x:hidden}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:#0a0a0f;color:#e0e0e0;line-height:1.7;overflow-x:hidden}
+
+/* ===== SCROLLBAR ===== */
+::-webkit-scrollbar{width:8px}
+::-webkit-scrollbar-track{background:#0a0a0f}
+::-webkit-scrollbar-thumb{background:#2a2a3a;border-radius:4px}
+::-webkit-scrollbar-thumb:hover{background:#3a3a5a}
+
+/* ===== NAV ===== */
+nav{position:fixed;top:0;left:0;right:0;z-index:1000;padding:18px 60px;display:flex;justify-content:space-between;align-items:center;background:rgba(10,10,15,0.85);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,0.05)}
+nav .logo{font-size:22px;font-weight:800;letter-spacing:-0.5px;background:linear-gradient(135deg,#6c63ff,#00d4aa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+nav .logo span{font-weight:300;color:rgba(255,255,255,0.4);-webkit-text-fill-color:rgba(255,255,255,0.4)}
+nav .nav-links{display:flex;gap:32px;list-style:none;align-items:center}
+nav .nav-links a{color:rgba(255,255,255,0.65);text-decoration:none;font-size:14px;font-weight:500;transition:color 0.3s;letter-spacing:0.3px;text-transform:uppercase}
+nav .nav-links a:hover{color:#fff}
+
+/* ===== HERO ===== */
+.hero{min-height:100vh;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;padding:120px 60px 80px}
+.hero-bg{position:absolute;inset:0;z-index:0}
+.hero-bg .orb{position:absolute;border-radius:50%;filter:blur(120px);opacity:0.3}
+.hero-bg .orb:nth-child(1){width:600px;height:600px;background:#6c63ff;top:-200px;left:-150px;animation:orbFloat 20s ease-in-out infinite}
+.hero-bg .orb:nth-child(2){width:500px;height:500px;background:#00d4aa;bottom:-200px;right:-100px;animation:orbFloat 25s ease-in-out infinite reverse}
+.hero-bg .orb:nth-child(3){width:400px;height:400px;background:#ff6b9d;top:40%;left:50%;transform:translate(-50%,-50%);animation:orbFloat 22s ease-in-out infinite 5s}
+@keyframes orbFloat{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(60px,-60px) scale(1.1)}66%{transform:translate(-40px,40px) scale(0.9)}}
+.hero-content{position:relative;z-index:1;text-align:center;max-width:900px}
+.hero-badge{display:inline-block;background:rgba(108,99,255,0.15);border:1px solid rgba(108,99,255,0.3);padding:8px 22px;border-radius:50px;font-size:13px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:#6c63ff;margin-bottom:28px}
+.hero h1{font-size:clamp(48px,8vw,96px);font-weight:900;line-height:1.05;letter-spacing:-3px;margin-bottom:20px;color:#fff}
+.hero h1 .gradient{background:linear-gradient(135deg,#6c63ff,#00d4aa,#ff6b9d);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero p{font-size:clamp(16px,2vw,22px);color:rgba(255,255,255,0.55);max-width:650px;margin:0 auto 36px;font-weight:300;line-height:1.8}
+.hero-actions{display:flex;gap:16px;justify-content:center;flex-wrap:wrap}
+.btn-primary{background:linear-gradient(135deg,#6c63ff,#00d4aa);color:#fff;border:none;padding:16px 40px;border-radius:8px;font-size:16px;font-weight:600;cursor:pointer;text-decoration:none;transition:transform 0.3s,box-shadow 0.3s}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 12px 40px rgba(108,99,255,0.35)}
+.btn-secondary{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:#fff;padding:16px 32px;border-radius:8px;font-size:16px;font-weight:500;cursor:pointer;text-decoration:none;transition:all 0.3s}
+.btn-secondary:hover{background:rgba(255,255,255,0.1);border-color:rgba(255,255,255,0.2)}
+.hero-scroll{position:absolute;bottom:30px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:8px;color:rgba(255,255,255,0.25);font-size:11px;letter-spacing:2px;text-transform:uppercase}
+.hero-scroll .arrow{width:20px;height:30px;border:2px solid rgba(255,255,255,0.2);border-radius:10px;position:relative;animation:scrollBounce 2s ease-in-out infinite}
+.hero-scroll .arrow::after{content:'';width:3px;height:8px;background:rgba(255,255,255,0.4);border-radius:2px;position:absolute;top:6px;left:50%;transform:translateX(-50%);animation:scrollDot 2s ease-in-out infinite}
+@keyframes scrollBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(8px)}}
+@keyframes scrollDot{0%,100%{opacity:1}50%{opacity:0.2}}
+
+/* ===== SECTION COMMON ===== */
+section{padding:100px 60px;position:relative}
+.section-label{display:inline-block;font-size:12px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#6c63ff;margin-bottom:12px}
+.section-title{font-size:clamp(32px,5vw,56px);font-weight:800;letter-spacing:-1.5px;color:#fff;margin-bottom:20px;line-height:1.15}
+.section-subtitle{font-size:18px;color:rgba(255,255,255,0.45);max-width:600px;font-weight:300}
+.section-header{text-align:center;margin-bottom:60px}
+
+/* ===== ABOUT ===== */
+.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;max-width:1200px;margin:0 auto}
+.about-visual{position:relative}
+.robot-scene-svg{width:100%;max-width:500px;height:auto}
+.about-text h3{font-size:14px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#6c63ff;margin-bottom:16px}
+.about-text p{font-size:16px;color:rgba(255,255,255,0.6);margin-bottom:20px;line-height:1.8}
+.about-text .highlight-box{background:rgba(108,99,255,0.06);border-left:3px solid #6c63ff;padding:20px 24px;border-radius:0 8px 8px 0;margin:24px 0}
+.about-text .highlight-box p{color:rgba(255,255,255,0.75);font-size:15px;margin-bottom:0}
+
+/* ===== 360 VIEWER (3D MODEL) ===== */
+.viewer-section{background:linear-gradient(180deg,#0a0a0f 0%,#0d0d1a 50%,#0a0a0f 100%)}
+.viewer-container{max-width:820px;margin:0 auto;text-align:center}
+.viewer-stage{position:relative;width:100%;height:540px;background:radial-gradient(ellipse at center,rgba(108,99,255,0.08) 0%,rgba(10,10,15,0.4) 60%,transparent 100%);border-radius:20px;border:1px solid rgba(255,255,255,0.05);overflow:hidden;cursor:grab;user-select:none;touch-action:pan-y;-webkit-user-select:none}
+.viewer-stage:active{cursor:grabbing}
+.viewer-stage canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.viewer-fallback{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:14px;color:rgba(255,255,255,0.4);padding:20px;text-align:center;z-index:3}
+.viewer-loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:12px;flex-direction:column;z-index:1;pointer-events:none}
+.viewer-loading .spinner{width:40px;height:40px;border:3px solid rgba(108,99,255,0.15);border-top-color:#6c63ff;border-radius:50%;animation:spin 0.8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.viewer-loading span{font-size:13px;color:rgba(255,255,255,0.4)}
+.viewer-hint{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.6);backdrop-filter:blur(10px);padding:8px 18px;border-radius:20px;font-size:12px;color:rgba(255,255,255,0.5);pointer-events:none;border:1px solid rgba(255,255,255,0.05);white-space:nowrap;transition:opacity 0.4s;z-index:2}
+.viewer-pill{position:absolute;top:16px;right:16px;display:flex;align-items:center;gap:8px;background:rgba(0,0,0,0.5);backdrop-filter:blur(10px);padding:6px 14px;border-radius:20px;border:1px solid rgba(255,255,255,0.06);pointer-events:none;z-index:2}
+.viewer-pill .pill-dot{width:8px;height:8px;border-radius:50%;background:#00d4aa;animation:dotPulse 1.6s ease-in-out infinite}
+.viewer-pill span:last-child{font-size:11px;color:rgba(255,255,255,0.6);letter-spacing:0.5px;text-transform:uppercase;font-weight:500}
+.viewer-pill.paused .pill-dot{background:#ff6b9d;animation:none}
+@keyframes dotPulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(0,212,170,0.4)}50%{opacity:0.5;box-shadow:0 0 0 6px rgba(0,212,170,0)}}
+.viewer-info{margin-top:16px;font-size:13px;color:rgba(255,255,255,0.3);letter-spacing:0.5px}
+
+/* ===== FEATURES ===== */
+.features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;max-width:1200px;margin:0 auto}
+.feature-card{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:16px;padding:36px 28px;transition:all 0.4s;position:relative;overflow:hidden}
+.feature-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#6c63ff,transparent);opacity:0;transition:opacity 0.4s}
+.feature-card:hover{background:rgba(255,255,255,0.05);border-color:rgba(108,99,255,0.2);transform:translateY(-4px)}
+.feature-card:hover::before{opacity:1}
+.feature-card .icon{width:52px;height:52px;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:20px;font-size:22px}
+.feature-card .icon.purple{background:rgba(108,99,255,0.12)}
+.feature-card .icon.teal{background:rgba(0,212,170,0.12)}
+.feature-card .icon.pink{background:rgba(255,107,157,0.12)}
+.feature-card h3{font-size:18px;font-weight:700;color:#fff;margin-bottom:12px}
+.feature-card p{font-size:14px;color:rgba(255,255,255,0.5);line-height:1.7}
+
+/* ===== ARTICLES ===== */
+.articles-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;max-width:1200px;margin:0 auto}
+.article-card{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:16px;overflow:hidden;transition:all 0.4s}
+.article-card:hover{background:rgba(255,255,255,0.05);border-color:rgba(108,99,255,0.2);transform:translateY(-4px)}
+.article-card .art-img{height:200px;background:linear-gradient(135deg,rgba(108,99,255,0.1),rgba(0,212,170,0.05));display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.article-card .art-img svg{width:80%;height:80%;max-width:240px}
+.article-card .art-body{padding:28px}
+.article-card .art-tag{display:inline-block;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:#6c63ff;margin-bottom:10px}
+.article-card h3{font-size:18px;font-weight:700;color:#fff;margin-bottom:12px;line-height:1.4}
+.article-card p{font-size:14px;color:rgba(255,255,255,0.5);line-height:1.7}
+.article-card .read-more{display:inline-block;margin-top:16px;color:#6c63ff;font-size:13px;font-weight:600;text-decoration:none;transition:gap 0.3s;display:inline-flex;align-items:center;gap:4px}
+.article-card .read-more:hover{gap:8px}
+
+/* ===== HOW IT WORKS ===== */
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;max-width:1200px;margin:0 auto}
+.step{text-align:center;padding:32px 20px;position:relative}
+.step:not(:last-child)::after{content:'';position:absolute;top:36px;right:-12px;width:24px;height:2px;background:linear-gradient(90deg,rgba(108,99,255,0.4),transparent)}
+.step-num{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,rgba(108,99,255,0.2),rgba(0,212,170,0.2));border:1px solid rgba(108,99,255,0.3);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:18px;font-weight:700;color:#6c63ff}
+.step h3{font-size:16px;font-weight:700;color:#fff;margin-bottom:10px}
+.step p{font-size:13px;color:rgba(255,255,255,0.45);line-height:1.6}
+
+/* ===== STATS ===== */
+.stats-bar{display:flex;justify-content:center;gap:60px;max-width:900px;margin:0 auto;padding:40px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.04);border-radius:20px}
+.stat-item{text-align:center}
+.stat-num{font-size:36px;font-weight:800;color:#fff;letter-spacing:-1px}
+.stat-num .accent{color:#6c63ff}
+.stat-label{font-size:13px;color:rgba(255,255,255,0.35);margin-top:4px;text-transform:uppercase;letter-spacing:1px}
+
+/* ===== CTA ===== */
+.cta{text-align:center;background:linear-gradient(135deg,rgba(108,99,255,0.05),rgba(0,212,170,0.02));border-top:1px solid rgba(108,99,255,0.1);border-bottom:1px solid rgba(108,99,255,0.1)}
+
+/* ===== FOOTER ===== */
+footer{text-align:center;padding:40px 60px;border-top:1px solid rgba(255,255,255,0.04)}
+footer p{font-size:14px;color:rgba(255,255,255,0.2)}
+footer .footer-links{display:flex;justify-content:center;gap:24px;margin-bottom:16px;flex-wrap:wrap}
+footer .footer-links a{color:rgba(255,255,255,0.3);text-decoration:none;font-size:13px;transition:color 0.3s}
+footer .footer-links a:hover{color:#fff}
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:1024px){
+  .features-grid,.articles-grid{grid-template-columns:repeat(2,1fr)}
+  .steps{grid-template-columns:repeat(2,1fr)}
+  .step:not(:last-child)::after{display:none}
+}
+@media(max-width:768px){
+  nav{padding:14px 20px;flex-direction:column;gap:12px}
+  nav .nav-links{gap:16px;flex-wrap:wrap;justify-content:center}
+  section{padding:60px 20px}
+  .hero{padding:120px 20px 80px}
+  .about-grid,.articles-grid{grid-template-columns:1fr}
+  .features-grid{grid-template-columns:1fr}
+  .steps{grid-template-columns:1fr;gap:16px}
+  .stats-bar{flex-direction:column;gap:24px;padding:24px;margin:0 12px}
+  .viewer-wrapper{min-height:300px}
+}
+</style>
+</head>
+<body>
+
+<!-- ===== NAV ===== -->
+<nav>
+  <div class="logo">Open<span>Paw</span></div>
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#viewer">Robot</a></li>
+    <li><a href="#features">Features</a></li>
+    <li><a href="#articles">Articles</a></li>
+    <li><a href="#howitworks">How It Works</a></li>
+  </ul>
+</nav>
+
+<!-- ===== HERO ===== -->
+<section class="hero" id="home">
+  <div class="hero-bg">
+    <div class="orb"></div>
+    <div class="orb"></div>
+    <div class="orb"></div>
+  </div>
+  <div class="hero-content">
+    <div class="hero-badge">Open Source Platform</div>
+    <h1>Build the Future of<br><span class="gradient">Pet Robotics</span></h1>
+    <p>OpenPaw is the world's first open-source robotics platform designed for pets. From play and companionship to health monitoring, the code is yours to explore, modify, and improve.</p>
+    <div class="hero-actions">
+      <a href="#viewer" class="btn-primary">Explore the Robot</a>
+    </div>
+  </div>
+  <div class="hero-scroll">
+    <span>Scroll</span>
+    <div class="arrow"></div>
+  </div>
+</section>
+
+<!-- ===== ABOUT ===== -->
+<section id="about">
+  <div class="section-header">
+    <div class="section-label">About OpenPaw</div>
+    <h2 class="section-title">A Robot Built for Every Pet</h2>
+    <p class="section-subtitle">OpenPaw is an open-source robotics platform designed from the ground up to interact with, monitor, and enrich the lives of dogs, cats, and other companion animals.</p>
+  </div>
+  <div class="about-grid">
+    <div class="about-visual">
+      <svg class="robot-scene-svg" viewBox="0 0 500 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Robot body -->
+        <rect x="180" y="180" width="140" height="120" rx="16" fill="url(#robotGrad)" stroke="rgba(108,99,255,0.3)" stroke-width="2"/>
+        <rect x="195" y="195" width="50" height="40" rx="8" fill="rgba(0,0,0,0.3)"/>
+        <rect x="255" y="195" width="50" height="40" rx="8" fill="rgba(0,0,0,0.3)"/>
+        <!-- Robot eyes / face -->
+        <circle cx="220" cy="215" r="6" fill="#00d4aa" opacity="0.9"><animate attributeName="opacity" values="0.9;0.5;0.9" dur="2s" repeatCount="indefinite"/></circle>
+        <circle cx="280" cy="215" r="6" fill="#00d4aa" opacity="0.9"><animate attributeName="opacity" values="0.9;0.5;0.9" dur="2s" repeatCount="indefinite"/></circle>
+        <rect x="240" y="225" width="20" height="4" rx="2" fill="#6c63ff"/>
+        <!-- Head -->
+        <rect x="190" y="140" width="120" height="50" rx="20" fill="url(#robotGrad)" stroke="rgba(108,99,255,0.3)" stroke-width="2"/>
+        <circle cx="220" cy="162" r="8" fill="#00d4aa" opacity="0.8">
+          <animate attributeName="r" values="6;8;6" dur="3s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="280" cy="162" r="8" fill="#00d4aa" opacity="0.8">
+          <animate attributeName="r" values="6;8;6" dur="3s" repeatCount="indefinite"/>
+        </circle>
+        <!-- Antenna -->
+        <line x1="250" y1="120" x2="250" y2="140" stroke="rgba(108,99,255,0.4)" stroke-width="2"/>
+        <circle cx="250" cy="115" r="6" fill="#6c63ff" opacity="0.6">
+          <animate attributeName="r" values="6;9;6" dur="2s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="0.6;1;0.6" dur="2s" repeatCount="indefinite"/>
+        </circle>
+        <!-- Wheels -->
+        <ellipse cx="210" cy="300" rx="25" ry="10" fill="#2a2a3a" stroke="rgba(108,99,255,0.2)" stroke-width="1.5"/>
+        <ellipse cx="290" cy="300" rx="25" ry="10" fill="#2a2a3a" stroke="rgba(108,99,255,0.2)" stroke-width="1.5"/>
+        <!-- Dog (left) -->
+        <ellipse cx="100" cy="310" rx="45" ry="30" fill="#c4956a"/>
+        <circle cx="80" cy="285" r="22" fill="#c4956a"/>
+        <ellipse cx="65" cy="270" rx="12" ry="6" fill="#c4956a" transform="rotate(-30,65,270)"/>
+        <ellipse cx="95" cy="270" rx="12" ry="6" fill="#c4956a" transform="rotate(10,95,270)"/>
+        <circle cx="75" cy="280" r="4" fill="#2a1a0a"/>
+        <circle cx="72" cy="275" r="2" fill="#2a1a0a" opacity="0.5"/>
+        <path d="M65 295 Q60 308 68 310 Q75 308 75 295" fill="#e8b088"/>
+        <!-- Dog tail -->
+        <path d="M140 300 Q160 280 155 260" stroke="#c4956a" stroke-width="5" stroke-linecap="round" fill="none"/>
+        <!-- Cat (right) -->
+        <ellipse cx="400" cy="310" rx="30" ry="22" fill="#808080"/>
+        <circle cx="385" cy="283" r="18" fill="#808080"/>
+        <path d="M373 268 L368 255 L378 265Z" fill="#808080"/>
+        <path d="M397 268 L402 255 L392 265Z" fill="#808080"/>
+        <circle cx="380" cy="280" r="3" fill="#1a1a1a"/>
+        <circle cx="378" cy="276" r="1.5" fill="#1a1a1a" opacity="0.5"/>
+        <path d="M373 292 Q370 302 375 304 Q380 302 380 292" fill="#ffb0b0"/>
+        <!-- Cat tail -->
+        <path d="M430 305 Q445 295 440 275" stroke="#808080" stroke-width="3" stroke-linecap="round" fill="none"/>
+        <!-- Connection lines robot-to-pets -->
+        <path d="M180 250 Q140 240 120 280" stroke="rgba(108,99,255,0.15)" stroke-width="1.5" stroke-dasharray="4,4" fill="none"/>
+        <path d="M320 250 Q360 240 380 280" stroke="rgba(108,99,255,0.15)" stroke-width="1.5" stroke-dasharray="4,4" fill="none"/>
+        <!-- Ground -->
+        <line x1="30" y1="325" x2="470" y2="325" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+        <!-- WiFi signal -->
+        <path d="M230 90 Q240 75 260 75 Q280 75 290 90" stroke="rgba(0,212,170,0.3)" stroke-width="1.5" fill="none"/>
+        <path d="M235 98 Q245 85 260 85 Q275 85 285 98" stroke="rgba(0,212,170,0.2)" stroke-width="1.5" fill="none"/>
+        <!-- Gradients -->
+        <defs>
+          <linearGradient id="robotGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#1a1a2e"/>
+            <stop offset="100%" stop-color="#16213e"/>
+          </linearGradient>
+        </defs>
+      </svg>
+    </div>
+    <div class="about-text">
+      <h3>Where Open Source Meets Pet Care</h3>
+      <p>OpenPaw is more than a robot -- it is an open hardware and software platform that puts the power of pet companionship technology into everyone's hands. Built on the ESP32-S3 platform with a rich sensor suite including camera, microphone, speaker, motor drivers, and an LED matrix face, OpenPaw can see, hear, move, and express itself.</p>
+      <p>Whether you want a robotic playmate for your dog, a remote monitoring station for your cat, or a programmable platform for pet behavior research, OpenPaw gives you the complete toolset to build it.</p>
+      <div class="highlight-box">
+        <p>Every line of code, every schematic, every design file is freely available. Fork it. Modify it. Make it yours. OpenPaw is built on the belief that the best pet technology comes from an open community.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 360 VIEWER ===== -->
+<section id="viewer" class="viewer-section">
+  <div class="section-header">
+    <div class="section-label">Interactive Viewer</div>
+    <h2 class="section-title">Explore Every Angle</h2>
+    <p class="section-subtitle">The real OpenPaw robot in full 3D. Drag with your cursor to rotate it 360 degrees in any direction.</p>
+  </div>
+  <div class="viewer-container">
+    <div class="viewer-stage" id="viewerStage">
+      <canvas id="robotCanvas"></canvas>
+      <div class="viewer-loading" id="viewerLoading"><div class="spinner"></div><span>Loading 3D model...</span></div>
+      <div class="viewer-hint" id="viewerHint">Drag to rotate</div>
+      <div class="viewer-pill" id="viewerPill"><span class="pill-dot"></span><span id="viewerStatus">Auto-spinning</span></div>
+    </div>
+    <div class="viewer-info">Drag with mouse or finger to rotate. Scroll to zoom. Release and it keeps turning.</div>
+  </div>
+</section>
+
+<!-- ===== FEATURES ===== -->
+<section id="features">
+  <div class="section-header">
+    <div class="section-label">Capabilities</div>
+    <h2 class="section-title">What OpenPaw Can Do</h2>
+    <p class="section-subtitle">A rich feature set packed into an open, hackable platform.</p>
+  </div>
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="icon purple">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6c63ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2"/><path d="M16.24 7.76a6 6 0 0 1 0 8.49m-8.48-.01a6 6 0 0 1 0-8.49m11.31-2.82a10 10 0 0 1 0 14.14m-14.14 0a10 10 0 0 1 0-14.14"/></svg>
+      </div>
+      <h3>Two-Way Communication</h3>
+      <p>Built-in microphone and speaker let you talk to your pet and hear them respond. Real-time audio streaming over WiFi means you are always connected, whether you are in the next room or across the world.</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon teal">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#00d4aa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+      </div>
+      <h3>Live Camera Feed</h3>
+      <p>OV2640 camera delivers smooth video streaming to your phone or computer. Check in on your pets anytime with a live view, motion detection, and snapshot capture -- all over a secure WiFi connection.</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon pink">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ff6b9d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+      </div>
+      <h3>Fully Programmable</h3>
+      <p>Powered by ESP32-S3 with ESP-IDF framework. Customize motor behavior, LED face expressions, audio responses, and sensor logic. The entire firmware is open source and well-documented for developers of all skill levels.</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon purple">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6c63ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      </div>
+      <h3>Autonomous Movement</h3>
+      <p>Dual DRV8833 motor drivers with differential steering give OpenPaw precise, smooth mobility. Program patrol routes, follow-behind behavior, or create custom movement patterns for interactive play sessions with your pet.</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon teal">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#00d4aa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+      </div>
+      <h3>LED Matrix Face</h3>
+      <p>IS31FL3733-driven LED matrix provides a rich, animated face with expressive eyes and moods. Display icons, animations, or real-time status indicators. The face is fully customizable through software.</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon pink">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ff6b9d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      </div>
+      <h3>Built by a Community</h3>
+      <p>OpenPaw thrives on contributions. From hardware revisions to software features, translations to documentation, the community drives every improvement. Join developers, makers, and pet lovers building the future together.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== STATS ===== -->
+<section style="padding:60px">
+  <div class="stats-bar">
+    <div class="stat-item">
+      <div class="stat-num"><span class="accent">100%</span></div>
+      <div class="stat-label">Open Source</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num"><span class="accent">ESP32</span>-S3</div>
+      <div class="stat-label">Core Platform</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num"><span class="accent">WiFi</span> + I2C</div>
+      <div class="stat-label">Connectivity</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num"><span class="accent">DIY</span> Ready</div>
+      <div class="stat-label">Build It Yourself</div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== HOW IT WORKS ===== -->
+<section id="howitworks">
+  <div class="section-header">
+    <div class="section-label">Getting Started</div>
+    <h2 class="section-title">From Zero to Robot in Four Steps</h2>
+    <p class="section-subtitle">OpenPaw is designed to be accessible whether you are a seasoned engineer or a curious maker.</p>
+  </div>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <h3>Gather Components</h3>
+      <p>Source the ESP32-S3 board, OV2640 camera, DRV8833 motors, chassis, and sensor modules. A complete bill of materials is available in the repository.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <h3>Build the Hardware</h3>
+      <p>Follow the detailed assembly guides with step-by-step instructions, wiring diagrams, and 3D-printable chassis files. No specialized tools required.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <h3>Flash the Firmware</h3>
+      <p>Clone the repository and flash the firmware using ESP-IDF. Pre-built binaries are available for quick starts, or compile from source for full control.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <h3>Connect & Customize</h3>
+      <p>Connect to the OpenPaw WiFi access point, open the web interface, and start interacting. Modify the code, add features, and share your improvements.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== ARTICLES ===== -->
+<section id="articles">
+  <div class="section-header">
+    <div class="section-label">Articles</div>
+    <h2 class="section-title">Deep Dives into OpenPaw</h2>
+    <p class="section-subtitle">In-depth explorations of what OpenPaw makes possible for pets, makers, and researchers.</p>
+  </div>
+  <div class="articles-grid">
+
+    <!-- Article 1 -->
+    <div class="article-card">
+      <div class="art-img">
+        <svg viewBox="0 0 240 160" fill="none">
+          <circle cx="120" cy="70" r="40" fill="rgba(108,99,255,0.1)" stroke="rgba(108,99,255,0.2)" stroke-width="1"/>
+          <circle cx="120" cy="70" r="25" fill="rgba(108,99,255,0.15)"/>
+          <path d="M60 130 Q80 90 120 70 Q160 90 180 130" stroke="rgba(0,212,170,0.2)" stroke-width="2" fill="none"/>
+          <path d="M70 145 Q90 105 120 90 Q150 105 170 145" stroke="rgba(0,212,170,0.1)" stroke-width="1.5" fill="none"/>
+          <circle cx="120" cy="70" r="8" fill="#6c63ff" opacity="0.4"/>
+          <line x1="120" y1="70" x2="120" y2="50" stroke="rgba(108,99,255,0.2)" stroke-width="1"/>
+          <line x1="120" y1="70" x2="140" y2="60" stroke="rgba(108,99,255,0.15)" stroke-width="1"/>
+          <line x1="120" y1="70" x2="100" y2="60" stroke="rgba(108,99,255,0.15)" stroke-width="1"/>
+        </svg>
+      </div>
+      <div class="art-body">
+        <div class="art-tag">Technology</div>
+        <h3>Why Open Source Robotics Matters for Pet Care</h3>
+        <p>Closed ecosystems limit innovation. OpenPaw breaks the mold by giving everyone access to the full stack -- from motor control algorithms to camera pipeline tuning. When the community can inspect, modify, and improve every layer, the technology advances faster and serves pets better. Open source means your robot is never locked into a single company's roadmap.</p>
+        <a href="#" class="read-more">Read More <span>&rarr;</span></a>
+      </div>
+    </div>
+
+    <!-- Article 2 -->
+    <div class="article-card">
+      <div class="art-img">
+        <svg viewBox="0 0 240 160" fill="none">
+          <rect x="70" y="30" width="100" height="70" rx="10" fill="rgba(0,212,170,0.08)" stroke="rgba(0,212,170,0.2)" stroke-width="1"/>
+          <circle cx="95" cy="55" r="5" fill="#00d4aa" opacity="0.6"/>
+          <circle cx="145" cy="55" r="5" fill="#00d4aa" opacity="0.6"/>
+          <path d="M120 65 L130 80 L110 80Z" fill="rgba(0,212,170,0.15)"/>
+          <rect x="85" y="85" width="70" height="8" rx="4" fill="rgba(0,212,170,0.1)"/>
+          <ellipse cx="85" cy="105" rx="18" ry="6" fill="rgba(255,255,255,0.05)"/>
+          <ellipse cx="155" cy="105" rx="18" ry="6" fill="rgba(255,255,255,0.05)"/>
+          <rect x="105" y="100" width="30" height="12" rx="4" fill="rgba(108,99,255,0.15)"/>
+        </svg>
+      </div>
+      <div class="art-body">
+        <div class="art-tag">Hardware</div>
+        <h3>Inside the OpenPaw Architecture: ESP32-S3 Deep Dive</h3>
+        <p>The ESP32-S3 is the brain of OpenPaw, chosen for its dual-core processing, built-in WiFi and BLE, and rich peripheral set. With the OV2640 camera feeding real-time video over the DVP interface, the DRV8833 motor drivers providing smooth differential drive control, and the IS31FL3733 LED driver animating the expressive face, every component was selected for performance, availability, and hackability.</p>
+        <a href="#" class="read-more">Read More <span>&rarr;</span></a>
+      </div>
+    </div>
+
+    <!-- Article 3 -->
+    <div class="article-card">
+      <div class="art-img">
+        <svg viewBox="0 0 240 160" fill="none">
+          <ellipse cx="90" cy="100" rx="35" ry="25" fill="rgba(108,99,255,0.06)"/>
+          <circle cx="75" cy="80" r="16" fill="rgba(108,99,255,0.08)"/>
+          <circle cx="72" cy="78" r="2" fill="rgba(108,99,255,0.3)"/>
+          <ellipse cx="150" cy="100" rx="28" ry="20" fill="rgba(255,107,157,0.06)"/>
+          <circle cx="140" cy="82" r="14" fill="rgba(255,107,157,0.08)"/>
+          <circle cx="137" cy="80" r="2" fill="rgba(255,107,157,0.3)"/>
+          <!-- Heart -->
+          <path d="M120 120 Q110 108 120 100 Q130 108 120 120Z" fill="rgba(255,107,157,0.15)"/>
+          <path d="M55 130 Q70 115 90 130" stroke="rgba(108,99,255,0.15)" stroke-width="1.5" fill="none"/>
+          <path d="M185 130 Q170 115 150 130" stroke="rgba(255,107,157,0.15)" stroke-width="1.5" fill="none"/>
+        </svg>
+      </div>
+      <div class="art-body">
+        <div class="art-tag">Community</div>
+        <h3>Building a Community Around Open Pet Technology</h3>
+        <p>OpenPaw is more than hardware and code -- it is a growing community of pet lovers, roboticists, veterinarians, and makers who believe technology should serve animals openly. Early adopters are already building custom integrations: automatic feeder controls, treat dispensers, health tracking dashboards, and multi-robot coordination systems. Your contribution shapes what OpenPaw becomes.</p>
+        <a href="#" class="read-more">Read More <span>&rarr;</span></a>
+      </div>
+    </div>
+
+    <!-- Article 4 -->
+    <div class="article-card">
+      <div class="art-img">
+        <svg viewBox="0 0 240 160" fill="none">
+          <circle cx="120" cy="60" r="35" fill="rgba(0,212,170,0.05)" stroke="rgba(0,212,170,0.15)" stroke-width="1"/>
+          <circle cx="120" cy="60" r="15" fill="rgba(0,212,170,0.08)"/>
+          <circle cx="120" cy="60" r="5" fill="#00d4aa" opacity="0.3"/>
+          <!-- Orbit paths -->
+          <ellipse cx="120" cy="60" rx="55" ry="20" fill="none" stroke="rgba(0,212,170,0.08)" stroke-width="1" stroke-dasharray="3,3"/>
+          <ellipse cx="120" cy="60" rx="45" ry="15" fill="none" stroke="rgba(108,99,255,0.08)" stroke-width="1" stroke-dasharray="3,3"/>
+          <!-- Data nodes -->
+          <circle cx="120" cy="40" r="3" fill="#6c63ff" opacity="0.5"/>
+          <circle cx="120" cy="80" r="3" fill="#6c63ff" opacity="0.5"/>
+          <circle cx="95" cy="60" r="3" fill="#6c63ff" opacity="0.5"/>
+          <circle cx="145" cy="60" r="3" fill="#6c63ff" opacity="0.5"/>
+        </svg>
+      </div>
+      <div class="art-body">
+        <div class="art-tag">Research</div>
+        <h3>Using OpenPaw for Animal Behavior Research</h3>
+        <p>Researchers are exploring OpenPaw as a standardized platform for animal behavior studies. The consistent hardware and fully open software stack enable reproducible experiments in pet cognition, social interaction with robots, and environmental enrichment. With integrated camera, microphone, and movement logging, OpenPaw provides rich data streams for behavioral analysis without expensive proprietary equipment.</p>
+        <a href="#" class="read-more">Read More <span>&rarr;</span></a>
+      </div>
+    </div>
+
+    <!-- Article 5 -->
+    <div class="article-card">
+      <div class="art-img">
+        <svg viewBox="0 0 240 160" fill="none">
+          <rect x="60" y="40" width="120" height="80" rx="8" fill="rgba(108,99,255,0.04)" stroke="rgba(108,99,255,0.15)" stroke-width="1"/>
+          <rect x="70" y="50" width="100" height="8" rx="4" fill="rgba(108,99,255,0.08)"/>
+          <rect x="70" y="65" width="80" height="6" rx="3" fill="rgba(108,99,255,0.06)"/>
+          <rect x="70" y="78" width="90" height="6" rx="3" fill="rgba(108,99,255,0.06)"/>
+          <rect x="70" y="91" width="50" height="6" rx="3" fill="rgba(108,99,255,0.06)"/>
+          <rect x="60" y="128" width="120" height="2" fill="rgba(0,212,170,0.08)"/>
+          <circle cx="180" cy="50" r="4" fill="#00d4aa" opacity="0.4"/>
+        </svg>
+      </div>
+      <div class="art-body">
+        <div class="art-tag">How-To</div>
+        <h3>Your First OpenPaw Build: A Complete Walkthrough</h3>
+        <p>Ready to build your own OpenPaw? This comprehensive guide walks through every step: sourcing components from online retailers, 3D printing the chassis (STL files included), soldering the motor driver and sensor breakout boards, assembling the LED face matrix, wiring the camera module, and flashing the firmware. Expected build time for a beginner is approximately four hours.</p>
+        <a href="#" class="read-more">Read More <span>&rarr;</span></a>
+      </div>
+    </div>
+
+    <!-- Article 6 -->
+    <div class="article-card">
+      <div class="art-img">
+        <svg viewBox="0 0 240 160" fill="none">
+          <path d="M60 120 Q60 40 120 40 Q180 40 180 120" stroke="rgba(255,107,157,0.15)" stroke-width="1.5" fill="none"/>
+          <circle cx="120" cy="80" r="20" fill="rgba(255,107,157,0.05)" stroke="rgba(255,107,157,0.12)" stroke-width="1"/>
+          <circle cx="120" cy="80" r="10" fill="rgba(255,107,157,0.08)"/>
+          <line x1="100" y1="80" x2="60" y2="120" stroke="rgba(255,107,157,0.08)" stroke-width="1" stroke-dasharray="3,3"/>
+          <line x1="140" y1="80" x2="180" y2="120" stroke="rgba(255,107,157,0.08)" stroke-width="1" stroke-dasharray="3,3"/>
+          <line x1="120" y1="60" x2="120" y2="40" stroke="rgba(108,99,255,0.12)" stroke-width="1" stroke-dasharray="3,3"/>
+          <line x1="120" y1="100" x2="120" y2="120" stroke="rgba(0,212,170,0.12)" stroke-width="1" stroke-dasharray="3,3"/>
+        </svg>
+      </div>
+      <div class="art-body">
+        <div class="art-tag">Vision</div>
+        <h3>OpenPaw and the Future of Pet Health Technology</h3>
+        <p>The long-term vision for OpenPaw extends beyond companionship into proactive pet health management. With the camera module monitoring activity levels and gait patterns, the microphone analyzing vocalizations for signs of distress, and the motor system encouraging exercise through interactive play, OpenPaw becomes a platform for preventative care that grows smarter with every software update contributed by the community.</p>
+        <a href="#" class="read-more">Read More <span>&rarr;</span></a>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ===== CTA ===== -->
+<section class="cta">
+  <div class="section-header" style="margin-bottom:20px">
+    <div class="section-label">Get Started</div>
+    <h2 class="section-title">Ready to Build?</h2>
+    <p class="section-subtitle" style="margin:0 auto 32px">Join the movement bringing open pet robotics to every home. OpenPaw is free, open, and built for everyone.</p>
+  </div>
+  <div class="hero-actions">
+    <a href="#viewer" class="btn-primary">See the Robot in Action</a>
+    <a href="#articles" class="btn-secondary">Learn More</a>
+  </div>
+</section>
+
+<!-- ===== FOOTER ===== -->
+<footer>
+  <div class="footer-links">
+    <a href="#about">About</a>
+    <a href="#features">Features</a>
+    <a href="#articles">Articles</a>
+    <a href="#howitworks">How It Works</a>
+  </div>
+  <p>OpenPaw is an open-source project. Built with care for pets and makers everywhere.</p>
+  <p style="margin-top:6px;font-size:12px">Not affiliated with PawMe. OpenPaw is a separate open-source hardware platform.</p>
+</footer>
+
+<!-- ===== JAVASCRIPT ===== -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+(function() {
+  // ----- Smooth scroll for nav -----
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', function(e) {
+      const target = document.querySelector(this.getAttribute('href'));
+      if (target) {
+        e.preventDefault();
+        const offset = 80;
+        const top = target.getBoundingClientRect().top + window.pageYOffset - offset;
+        window.scrollTo({ top, behavior: 'smooth' });
+      }
+    });
+  });
+
+  // ----- Intersection Observer for fade-in -----
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.style.opacity = '1';
+        entry.target.style.transform = 'translateY(0)';
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.feature-card, .article-card, .step, .about-grid').forEach(el => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(30px)';
+    el.style.transition = 'opacity 0.7s ease, transform 0.7s ease';
+    observer.observe(el);
+  });
+
+  // ----- 3D Robot Model Viewer (GLB) -----
+  const stage = document.getElementById('viewerStage');
+  const canvas = document.getElementById('robotCanvas');
+  const hint = document.getElementById('viewerHint');
+  const pill = document.getElementById('viewerPill');
+  const statusEl = document.getElementById('viewerStatus');
+  const loadingEl = document.getElementById('viewerLoading');
+
+  if (typeof THREE === 'undefined') {
+    stage.innerHTML = '<div class="viewer-fallback">The 3D viewer needs an internet connection to load.</div>';
+  } else {
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.2;
+    renderer.outputEncoding = THREE.sRGBEncoding;
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 100);
+    camera.position.set(3.5, 2.2, 4.5);
+
+    const controls = new THREE.OrbitControls(camera, canvas);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.08;
+    controls.autoRotate = true;
+    controls.autoRotateSpeed = 2.5;
+    controls.minDistance = 1.2;
+    controls.maxDistance = 12;
+    controls.target.set(0, 0.8, 0);
+    controls.update();
+
+    // Lights
+    const hemi = new THREE.HemisphereLight(0x8a9aff, 0x0a0a12, 0.7);
+    scene.add(hemi);
+
+    const key = new THREE.DirectionalLight(0xffffff, 1.3);
+    key.position.set(4, 8, 5);
+    key.castShadow = true;
+    key.shadow.mapSize.set(1024, 1024);
+    key.shadow.camera.near = 0.5;
+    key.shadow.camera.far = 20;
+    key.shadow.camera.left = -5;
+    key.shadow.camera.right = 5;
+    key.shadow.camera.top = 5;
+    key.shadow.camera.bottom = -5;
+    scene.add(key);
+
+    const fill = new THREE.DirectionalLight(0x6c63ff, 0.35);
+    fill.position.set(-3, 1, -2);
+    scene.add(fill);
+
+    const rim = new THREE.DirectionalLight(0xff8844, 0.25);
+    rim.position.set(0, -1, -5);
+    scene.add(rim);
+
+    // Ground shadow
+    const shadow = new THREE.Mesh(
+      new THREE.CircleGeometry(2.5, 48),
+      new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.25, depthWrite: false })
+    );
+    shadow.rotation.x = -Math.PI / 2;
+    shadow.position.y = 0.01;
+    scene.add(shadow);
+
+    // Load GLB model via fetch + parse (better for large files)
+        const loader = new THREE.GLTFLoader();
+        fetch('images/robot-model.glb')
+          .then(res => {
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            return res.arrayBuffer();
+          })
+          .then(buf => {
+            loadingEl.querySelector('span').textContent = 'Loading 3D model... processing';
+            return new Promise((resolve, reject) => {
+              loader.parse(buf, '', resolve, reject);
+            });
+          })
+          .then(function(gltf) {
+            const model = gltf.scene;
+            // Center and scale
+            const box = new THREE.Box3().setFromObject(model);
+            const size = box.getSize(new THREE.Vector3());
+            const maxDim = Math.max(size.x, size.y, size.z);
+            const scale = 1.8 / maxDim;
+            model.scale.set(scale, scale, scale);
+
+            const center = box.getCenter(new THREE.Vector3());
+            model.position.sub(center.multiplyScalar(scale));
+
+            // Enable shadows on all meshes
+            model.traverse(child => {
+              if (child.isMesh) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+                child.frustumCulled = false;
+              }
+            });
+
+            scene.add(model);
+            controls.target.set(0, 1.0, 0);
+
+            // Hide loading indicator
+            loadingEl.style.display = 'none';
+            hint.style.opacity = '1';
+
+            // Auto-rotate status
+            controls.addEventListener('start', () => {
+              pill.classList.add('paused');
+              statusEl.textContent = 'You control the angle';
+              hint.style.opacity = '0';
+            });
+            controls.addEventListener('end', () => {
+              pill.classList.remove('paused');
+              statusEl.textContent = 'Auto-spinning';
+              setTimeout(() => { hint.style.opacity = '1'; }, 1200);
+            });
+          })
+          .catch(function(error) {
+            loadingEl.innerHTML = '<div class="viewer-fallback">Failed to load 3D model. ' + error.message + '</div>';
+            console.error('GLB load error:', error);
+          });
+
+    // Resize
+    function resize() {
+      const w = stage.clientWidth, h = stage.clientHeight;
+      renderer.setSize(w, h, false);
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    // Animate
+    function animate() {
+      requestAnimationFrame(animate);
+      controls.update();
+      renderer.render(scene, camera);
+    }
+    animate();
+  }
+})();
+</script>
+  </body>
+</html>
