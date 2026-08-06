@@ -1,55 +1,37 @@
 #!/bin/bash
-# Deploy openpaw-website to GitHub Pages
-
 cd /e/openpaw-website
+
+# Get token from git credential helper
 TOKEN=$(git credential fill <<< $'protocol=https\nhost=github.com\n' | grep password | cut -d= -f2)
-REPO="openpaw-website"
-USER="DhirajSharma89"
-
-echo "=== Creating GitHub repo $REPO ==="
-curl -s -H "Authorization: token $TOKEN" \
-     -H "Accept: application/vnd.github.v3+json" \
-     https://api.github.com/user/repos \
-     -d "{\"name\":\"$REPO\",\"description\":\"OpenPaw - Open Source Pet Robot Platform\",\"private\":false,\"has_pages\":true}" \
-     | grep -E '"full_name"|"html_url"' | head -2
-
-echo "=== Initializing git ==="
-rm -rf .git 2>/dev/null
-git init
-git checkout -b main
-git config user.name "DhirajSharma89"
-git config user.email "rhombahu@gmail.com"
-
-# Create .gitattributes for large files
-echo "*.glb filter=lfs diff=lfs merge=lfs -text" > .gitattributes
-
-# Create README
-echo "# OpenPaw Website" > README.md
-
-echo "=== Adding files ==="
-git add .
-git status | head -20
-
-echo "=== Committing ==="
-git commit -m "Initial commit: OpenPaw website with 3D robot model viewer" 2>&1 | tail -5
 
 echo "=== Pushing to GitHub ==="
-git remote add origin https://$TOKEN@github.com/$USER/$REPO.git
-git push -u origin main 2>&1 | tail -10
+git init 2>/dev/null
+git checkout -b main 2>/dev/null
+git config user.name "DhirajSharma89"
+git config user.email "rhombahu@gmail.com"
+git add index.html images/
+git commit -m "Deploy OpenPaw website with 3D robot model" 2>&1 | tail -5
+
+git remote remove origin 2>/dev/null
+git remote add origin "https://${TOKEN}@github.com/DhirajSharma89/openpaw-website.git"
+git push -u origin main 2>&1 | tail -15
 
 echo "=== Enabling GitHub Pages ==="
-curl -s -H "Authorization: token $TOKEN" \
+curl -s -H "Authorization: token ${TOKEN}" \
      -H "Accept: application/vnd.github.v3+json" \
-     -X POST "https://api.github.com/repos/$USER/$REPO/pages" \
-     -d "{\"source\":{\"branch\":\"main\",\"path\":\"/\"}}" 2>&1 | grep -E '"status"|"html_url"|"url"' | head -3
+     "https://api.github.com/repos/DhirajSharma89/openpaw-website/pages" > /dev/null 2>&1
 
-echo "=== Pages info ==="
-curl -s -H "Authorization: token $TOKEN" \
+curl -s -H "Authorization: token ${TOKEN}" \
      -H "Accept: application/vnd.github.v3+json" \
-     "https://api.github.com/repos/$USER/$REPO/pages" \
-     | grep -E '"html_url"|"status"' | head -3
+     -X POST "https://api.github.com/repos/DhirajSharma89/openpaw-website/pages" \
+     -d '{"source":{"branch":"main","path":"/"}}' > /dev/null 2>&1
+
+echo "=== Getting Pages URL ==="
+curl -s -H "Authorization: token ${TOKEN}" \
+     -H "Accept: application/vnd.github.v3+json" \
+     "https://api.github.com/repos/DhirajSharma89/openpaw-website/pages" \
+     | grep '"html_url"' | head -1
 
 echo ""
-echo "DONE! Your site will be available at:"
-echo "  https://$USER.github.io/$REPO/"
-echo "GitHub Pages may take a few minutes to deploy."
+echo "Deployment pushed! GitHub Pages will build and deploy shortly."
+echo "Your site will be at: https://dhirajsharma89.github.io/openpaw-website/"
